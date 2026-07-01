@@ -1,12 +1,6 @@
-import numpy as np
 import pandas as pd
 from pathlib import Path
 
-
-files_to_load = sorted(Path("djia29").glob("*.csv"))
-
-
-### Data Preprocessing ###
 
 def load_raw_djia(folder_path: str = 'data/raw'):
     """
