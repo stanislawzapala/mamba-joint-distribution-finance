@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import gennorm, rankdata
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 def sort_data_by_date(data):
     """
@@ -28,13 +30,13 @@ def calculate_returns(data):
     data['log_returns'] = np.log(data['close'] / data['close'].shift(1))
     return data
 
-def normalize_to_uniform(df: pd.DataFrame, columns: str = 'log_returns', method: str = 'gennorm') -> pd.DataFrame:
+def normalize_to_uniform(df: pd.DataFrame, column: str = 'log_returns', method: str = 'gennorm') -> pd.DataFrame:
     """
     Normalize the specified columns of a DataFrame to a uniform distribution [0,1].
 
     Parameters:
     df (pd.DataFrame): The input DataFrame.
-    columns (str): The column(s) to normalize. Default is 'log_returns'.
+    column (str): The column to normalize. Default is 'log_returns'.
     method (str): The normalization method. Default is 'gennorm'.
 
     Returns:
@@ -42,14 +44,14 @@ def normalize_to_uniform(df: pd.DataFrame, columns: str = 'log_returns', method:
     """
     df_copy = df.copy()
 
-    valid_data = df_copy[columns].dropna()
+    valid_data = df_copy[column].dropna()
 
     if method == 'gennorm':
         beta, loc, scale = gennorm.fit(valid_data)
         uniform_data = gennorm.cdf(valid_data, beta, loc=loc, scale=scale)
 
     elif method == 'ecdf':
-        uniform_data = rankdata(valid_data) / (len(valid_data) + 1)
+        uniform_data = rankdata(valid_data, method = 'ordinal') / (len(valid_data) + 1)
     
     else: raise ValueError("Invalid method. Choose 'gennorm' or 'ecdf'.")
 
