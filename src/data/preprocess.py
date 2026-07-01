@@ -1,3 +1,4 @@
+from arch import arch_model
 import numpy as np
 import pandas as pd
 from scipy.stats import gennorm, rankdata
@@ -30,6 +31,24 @@ def calculate_returns(data):
     data['log_returns'] = np.log(data['close'] / data['close'].shift(1))
     return data
 
+def add_garch_residuals(df: pd.DataFrame, column: str = 'log_returns') -> pd.DataFrame:
+    """
+    Fit a GARCH(1,1) model to the specified column of a DataFrame and return the standardized residuals.
+
+    Parameters:
+    df (pd.DataFrame): The input DataFrame.
+    column (str): The column to fit the GARCH model on. Default is 'log_returns'.
+
+    Returns:
+    pd.DataFrame: The DataFrame with the added 'garch_residuals' column.
+    """
+    series = df[column] * 100
+    model = arch_model(series.dropna(), vol='Garch', p=1, q=1)
+    garch_fit = model.fit(disp='off')
+    df['garch_residuals'] = garch_fit.std_resid
+    return df
+
+
 def normalize_to_uniform(df: pd.DataFrame, column: str = 'log_returns', method: str = 'gennorm') -> pd.DataFrame:
     """
     Normalize the specified columns of a DataFrame to a uniform distribution [0,1].
@@ -58,3 +77,4 @@ def normalize_to_uniform(df: pd.DataFrame, column: str = 'log_returns', method: 
     df_copy.loc[valid_data.index, 'uniform_returns'] = uniform_data
 
     return df_copy
+
